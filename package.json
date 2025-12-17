@@ -1,0 +1,49 @@
+{
+  "name": "clawmarks",
+  "version": "0.1.0",
+  "description": "MCP server for creating annotated code bookmarks - storybook-style metadata pointing to specific file locations",
+  "main": "dist/index.js",
+  "type": "module",
+  "bin": {
+    "clawmarks": "dist/index.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "start": "node dist/index.js",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "claude",
+    "ai",
+    "bookmarks",
+    "annotations",
+    "code-navigation",
+    "knowledge-graph"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mrilikecoding/clawmarks.git"
+  },
+  "homepage": "https://github.com/mrilikecoding/clawmarks#readme",
+  "bugs": {
+    "url": "https://github.com/mrilikecoding/clawmarks/issues"
+  },
+  "author": "",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "typescript": "^5.3.0"
+  }
+}
