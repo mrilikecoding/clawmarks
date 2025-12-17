@@ -1,6 +1,6 @@
 {
   "name": "clawmarks",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "MCP server for creating annotated code bookmarks - storybook-style metadata pointing to specific file locations",
   "main": "dist/index.js",
   "type": "module",
