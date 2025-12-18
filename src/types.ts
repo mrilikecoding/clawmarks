@@ -1,6 +1,6 @@
-export type ThreadStatus = 'active' | 'archived';
+export type TrailStatus = 'active' | 'archived';
 
-export type MarkType =
+export type ClawmarkType =
   | 'decision'      // A decision point that was made
   | 'question'      // Open question needing resolution
   | 'change_needed' // Code that needs modification
@@ -8,41 +8,41 @@ export type MarkType =
   | 'alternative'   // Alternative approach being considered
   | 'dependency';   // Something this depends on
 
-export interface Thread {
+export interface Trail {
   id: string;
   name: string;
   description?: string;
-  status: ThreadStatus;
+  status: TrailStatus;
   created_at: string;
 }
 
-export interface Mark {
+export interface Clawmark {
   id: string;
-  thread_id: string;
+  trail_id: string;
   file: string;
   line: number;
   column?: number;
   annotation: string;
-  type: MarkType;
+  type: ClawmarkType;
   tags: string[];
-  references: string[];  // IDs of other marks this references
+  references: string[];  // IDs of other clawmarks this references
   created_at: string;
 }
 
 export interface ClawmarksData {
   version: number;
-  threads: Thread[];
-  marks: Mark[];
+  trails: Trail[];
+  clawmarks: Clawmark[];
 }
 
 export const DEFAULT_CLAWMARKS_DATA: ClawmarksData = {
   version: 1,
-  threads: [],
-  marks: [],
+  trails: [],
+  clawmarks: [],
 };
 
 // Helper to generate unique IDs
-export function generateId(prefix: 't' | 'm'): string {
+export function generateId(prefix: 't' | 'c'): string {
   const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
   let id = '';
   for (let i = 0; i < 8; i++) {

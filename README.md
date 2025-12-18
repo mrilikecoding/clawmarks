@@ -1,42 +1,50 @@
 # Clawmarks
 
-**Claude + Marks** - Storybook-style annotated bookmarks for code.
+Storybook-style annotated bookmarks for code exploration.
 
-Clawmarks is an MCP server that lets AI agents (like Claude Code) create annotated bookmarks in your codebase. Marks are organized into threads, can reference each other (knowledge graph style), and are stored in a simple JSON file that any editor or tool can consume.
+## The Problem
+
+Working with an LLM agent on a complex problem often means iterating across multiple files, considering alternatives, making decisions, and building understanding over time. But when the conversation ends, you're left with a wall of chat history and modified files—no clear trail of *where* you went and *why*.
+
+Clawmarks solves this by letting agents drop annotated bookmarks as they work. These clawmarks capture the narrative of your exploration: decision points, open questions, alternatives considered, and how they all connect. The result is a navigable map of your coding session, not just a transcript.
 
 ## What It Does
 
-When you have a conversation with Claude about your code, Claude can drop "marks" at specific locations - annotated bookmarks that capture:
+Clawmarks is an MCP server that gives LLM agents tools to create annotated bookmarks in your codebase. Clawmarks are organized into trails (narrative journeys), can reference each other (knowledge graph style), and are stored in a simple JSON file that any editor can consume.
+
+Each clawmark captures:
 
 - **Where** - File, line, column
 - **What** - An annotation explaining why this location matters
-- **Type** - Is this a decision, a question, a change needed, an alternative approach?
-- **Connections** - References to other marks (knowledge graph edges)
-- **Context** - Tags and thread groupings
+- **Type** - Decision, question, change needed, alternative approach, etc.
+- **Connections** - References to other clawmarks (knowledge graph edges)
+- **Context** - Tags and trail groupings
 
-The result is a `.clawmarks.json` file - a portable, editor-agnostic record of the conversation's journey through your code.
+## Quick Start
 
-## Installation
+1. Install globally:
+   ```bash
+   npm install -g clawmarks
+   ```
 
-```bash
-npm install -g clawmarks
-```
+2. Add `.clawmarks.json` to your global gitignore (one-time setup):
+   ```bash
+   echo ".clawmarks.json" >> ~/.gitignore_global
+   git config --global core.excludesfile ~/.gitignore_global
+   ```
 
-## Configuration
+3. Add to your project's `.mcp.json`:
+   ```json
+   {
+     "mcpServers": {
+       "clawmarks": {
+         "command": "clawmarks"
+       }
+     }
+   }
+   ```
 
-Add to your Claude Code MCP configuration (`~/.claude.json` or project `.mcp.json`):
-
-```json
-{
-  "mcpServers": {
-    "clawmarks": {
-      "command": "clawmarks"
-    }
-  }
-}
-```
-
-The server uses the current working directory to store `.clawmarks.json`. You can override this with:
+The server stores `.clawmarks.json` in the current working directory. Override with:
 
 ```json
 {
@@ -53,34 +61,34 @@ The server uses the current working directory to store `.clawmarks.json`. You ca
 
 ## MCP Tools
 
-### Thread Management
+### Trail Management
 
 | Tool | Description |
 |------|-------------|
-| `create_thread` | Create a new thread to organize related marks |
-| `list_threads` | List all threads (optionally filter by status) |
-| `get_thread` | Get thread details with all its marks |
-| `archive_thread` | Archive a completed thread |
+| `create_trail` | Create a new trail to organize related clawmarks |
+| `list_trails` | List all trails (optionally filter by status) |
+| `get_trail` | Get trail details with all its clawmarks |
+| `archive_trail` | Archive a completed trail |
 
-### Mark Management
+### Clawmark Management
 
 | Tool | Description |
 |------|-------------|
-| `add_mark` | Add an annotated bookmark at a file location |
-| `update_mark` | Update mark metadata |
-| `delete_mark` | Remove a mark |
-| `list_marks` | List marks with optional filters |
+| `add_clawmark` | Add an annotated bookmark at a file location |
+| `update_clawmark` | Update clawmark metadata |
+| `delete_clawmark` | Remove a clawmark |
+| `list_clawmarks` | List clawmarks with optional filters |
 
 ### Knowledge Graph
 
 | Tool | Description |
 |------|-------------|
-| `link_marks` | Create a reference from one mark to another |
-| `unlink_marks` | Remove a reference |
-| `get_references` | Get all marks connected to a mark |
-| `list_tags` | List all tags used across marks |
+| `link_clawmarks` | Create a reference from one clawmark to another |
+| `unlink_clawmarks` | Remove a reference |
+| `get_references` | Get all clawmarks connected to a clawmark |
+| `list_tags` | List all tags used across clawmarks |
 
-### Mark Types
+### Clawmark Types
 
 - `decision` - A decision point that was made
 - `question` - Open question needing resolution
@@ -96,7 +104,7 @@ Clawmarks stores data in `.clawmarks.json`:
 ```json
 {
   "version": 1,
-  "threads": [
+  "trails": [
     {
       "id": "t_abc123",
       "name": "Auth Refactor Options",
@@ -105,17 +113,17 @@ Clawmarks stores data in `.clawmarks.json`:
       "created_at": "2025-12-17T10:30:00Z"
     }
   ],
-  "marks": [
+  "clawmarks": [
     {
-      "id": "m_xyz789",
-      "thread_id": "t_abc123",
+      "id": "c_xyz789",
+      "trail_id": "t_abc123",
       "file": "src/auth/handler.ts",
       "line": 42,
       "column": 8,
       "annotation": "Current session logic - could replace with JWT",
       "type": "alternative",
       "tags": ["#security", "#breaking-change"],
-      "references": ["m_def456"],
+      "references": ["c_def456"],
       "created_at": "2025-12-17T10:31:00Z"
     }
   ]
@@ -134,17 +142,17 @@ The `.clawmarks.json` file is designed to be consumed by any editor or tool.
 
 ## Example Usage
 
-In a Claude Code conversation:
+In a conversation with your LLM agent:
 
-> "Let's explore two approaches to refactoring the auth system. Can you create a thread and mark the key decision points?"
+> "Let's explore two approaches to refactoring the auth system. Can you create a trail and mark the key decision points?"
 
-Claude will:
-1. Create a thread called "Auth Refactor Options"
-2. Add marks at relevant code locations
-3. Link related marks together
-4. Tag marks with relevant concerns
+The agent will:
+1. Create a trail called "Auth Refactor Options"
+2. Add clawmarks at relevant code locations
+3. Link related clawmarks together
+4. Tag clawmarks with relevant concerns
 
-You can then browse these marks in your editor to revisit the conversation's journey through your code.
+You can then browse these clawmarks in your editor to revisit the exploration's journey through your code.
 
 ## License
 

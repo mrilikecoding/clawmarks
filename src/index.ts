@@ -8,7 +8,7 @@ import {
 } from '@modelcontextprotocol/sdk/types.js';
 import { ClawmarksStorage } from './storage.js';
 import { ClawmarksTools } from './tools.js';
-import { MarkType, ThreadStatus } from './types.js';
+import { ClawmarkType, TrailStatus } from './types.js';
 
 // Get project root from environment or use current working directory
 const PROJECT_ROOT = process.env.CLAWMARKS_PROJECT_ROOT || process.cwd();
@@ -32,77 +32,77 @@ const server = new Server(
 server.setRequestHandler(ListToolsRequestSchema, async () => {
   return {
     tools: [
-      // Thread tools
+      // Trail tools
       {
-        name: 'create_thread',
-        description: 'Create a new thread to organize related marks. Threads are like chapters in a storybook of code exploration.',
+        name: 'create_trail',
+        description: 'Create a new trail to organize related clawmarks. Trails are narrative journeys through your code exploration.',
         inputSchema: {
           type: 'object',
           properties: {
             name: {
               type: 'string',
-              description: 'Name of the thread (e.g., "Auth Refactor Options")',
+              description: 'Name of the trail (e.g., "Auth Refactor Options")',
             },
             description: {
               type: 'string',
-              description: 'Optional longer description of what this thread explores',
+              description: 'Optional longer description of what this trail explores',
             },
           },
           required: ['name'],
         },
       },
       {
-        name: 'list_threads',
-        description: 'List all threads, optionally filtered by status',
+        name: 'list_trails',
+        description: 'List all trails, optionally filtered by status',
         inputSchema: {
           type: 'object',
           properties: {
             status: {
               type: 'string',
               enum: ['active', 'archived'],
-              description: 'Filter by thread status',
+              description: 'Filter by trail status',
             },
           },
         },
       },
       {
-        name: 'get_thread',
-        description: 'Get a thread with all its marks',
+        name: 'get_trail',
+        description: 'Get a trail with all its clawmarks',
         inputSchema: {
           type: 'object',
           properties: {
-            thread_id: {
+            trail_id: {
               type: 'string',
-              description: 'The thread ID',
+              description: 'The trail ID',
             },
           },
-          required: ['thread_id'],
+          required: ['trail_id'],
         },
       },
       {
-        name: 'archive_thread',
-        description: 'Archive a thread (mark it as no longer active)',
+        name: 'archive_trail',
+        description: 'Archive a trail (mark it as no longer active)',
         inputSchema: {
           type: 'object',
           properties: {
-            thread_id: {
+            trail_id: {
               type: 'string',
-              description: 'The thread ID to archive',
+              description: 'The trail ID to archive',
             },
           },
-          required: ['thread_id'],
+          required: ['trail_id'],
         },
       },
-      // Mark tools
+      // Clawmark tools
       {
-        name: 'add_mark',
-        description: 'Add a mark (bookmark with annotation) to a location in the code. Marks are nodes in a knowledge graph of code exploration.',
+        name: 'add_clawmark',
+        description: 'Add a clawmark (annotated bookmark) to a location in the code. Clawmarks are points on your trail through the codebase.',
         inputSchema: {
           type: 'object',
           properties: {
-            thread_id: {
+            trail_id: {
               type: 'string',
-              description: 'The thread this mark belongs to',
+              description: 'The trail this clawmark belongs to',
             },
             file: {
               type: 'string',
@@ -123,7 +123,7 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
             type: {
               type: 'string',
               enum: ['decision', 'question', 'change_needed', 'reference', 'alternative', 'dependency'],
-              description: 'Type of mark: decision (made a choice), question (needs resolution), change_needed (code to modify), reference (context), alternative (another approach), dependency (something this depends on)',
+              description: 'Type of clawmark: decision (made a choice), question (needs resolution), change_needed (code to modify), reference (context), alternative (another approach), dependency (something this depends on)',
             },
             tags: {
               type: 'array',
@@ -131,18 +131,18 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
               description: 'Tags for categorization (e.g., ["#performance", "#breaking-change"])',
             },
           },
-          required: ['thread_id', 'file', 'line', 'annotation'],
+          required: ['trail_id', 'file', 'line', 'annotation'],
         },
       },
       {
-        name: 'update_mark',
-        description: 'Update an existing mark',
+        name: 'update_clawmark',
+        description: 'Update an existing clawmark',
         inputSchema: {
           type: 'object',
           properties: {
-            mark_id: {
+            clawmark_id: {
               type: 'string',
-              description: 'The mark ID to update',
+              description: 'The clawmark ID to update',
             },
             annotation: { type: 'string' },
             type: {
@@ -156,32 +156,32 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
             line: { type: 'number' },
             column: { type: 'number' },
           },
-          required: ['mark_id'],
+          required: ['clawmark_id'],
         },
       },
       {
-        name: 'delete_mark',
-        description: 'Delete a mark',
+        name: 'delete_clawmark',
+        description: 'Delete a clawmark',
         inputSchema: {
           type: 'object',
           properties: {
-            mark_id: {
+            clawmark_id: {
               type: 'string',
-              description: 'The mark ID to delete',
+              description: 'The clawmark ID to delete',
             },
           },
-          required: ['mark_id'],
+          required: ['clawmark_id'],
         },
       },
       {
-        name: 'list_marks',
-        description: 'List marks with optional filters',
+        name: 'list_clawmarks',
+        description: 'List clawmarks with optional filters',
         inputSchema: {
           type: 'object',
           properties: {
-            thread_id: {
+            trail_id: {
               type: 'string',
-              description: 'Filter by thread',
+              description: 'Filter by trail',
             },
             file: {
               type: 'string',
@@ -190,7 +190,7 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
             type: {
               type: 'string',
               enum: ['decision', 'question', 'change_needed', 'reference', 'alternative', 'dependency'],
-              description: 'Filter by mark type',
+              description: 'Filter by clawmark type',
             },
             tag: {
               type: 'string',
@@ -201,36 +201,36 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
       },
       // Reference/link tools
       {
-        name: 'link_marks',
-        description: 'Create a reference from one mark to another (knowledge graph edge)',
+        name: 'link_clawmarks',
+        description: 'Create a reference from one clawmark to another (knowledge graph edge)',
         inputSchema: {
           type: 'object',
           properties: {
             source_id: {
               type: 'string',
-              description: 'The source mark ID',
+              description: 'The source clawmark ID',
             },
             target_id: {
               type: 'string',
-              description: 'The target mark ID to reference',
+              description: 'The target clawmark ID to reference',
             },
           },
           required: ['source_id', 'target_id'],
         },
       },
       {
-        name: 'unlink_marks',
-        description: 'Remove a reference between marks',
+        name: 'unlink_clawmarks',
+        description: 'Remove a reference between clawmarks',
         inputSchema: {
           type: 'object',
           properties: {
             source_id: {
               type: 'string',
-              description: 'The source mark ID',
+              description: 'The source clawmark ID',
             },
             target_id: {
               type: 'string',
-              description: 'The target mark ID to unlink',
+              description: 'The target clawmark ID to unlink',
             },
           },
           required: ['source_id', 'target_id'],
@@ -238,22 +238,22 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
       },
       {
         name: 'get_references',
-        description: 'Get all marks that reference or are referenced by a mark',
+        description: 'Get all clawmarks that reference or are referenced by a clawmark',
         inputSchema: {
           type: 'object',
           properties: {
-            mark_id: {
+            clawmark_id: {
               type: 'string',
-              description: 'The mark ID to get references for',
+              description: 'The clawmark ID to get references for',
             },
           },
-          required: ['mark_id'],
+          required: ['clawmark_id'],
         },
       },
       // Tag tools
       {
         name: 'list_tags',
-        description: 'List all unique tags used across all marks',
+        description: 'List all unique tags used across all clawmarks',
         inputSchema: {
           type: 'object',
           properties: {},
@@ -269,45 +269,45 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 
   try {
     switch (name) {
-      // Thread operations
-      case 'create_thread': {
-        const result = await tools.createThread(
+      // Trail operations
+      case 'create_trail': {
+        const result = await tools.createTrail(
           args?.name as string,
           args?.description as string | undefined
         );
         return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
       }
 
-      case 'list_threads': {
-        const result = await tools.listThreads(args?.status as ThreadStatus | undefined);
+      case 'list_trails': {
+        const result = await tools.listTrails(args?.status as TrailStatus | undefined);
         return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
       }
 
-      case 'get_thread': {
-        const result = await tools.getThread(args?.thread_id as string);
+      case 'get_trail': {
+        const result = await tools.getTrail(args?.trail_id as string);
         if (!result) {
-          return { content: [{ type: 'text', text: 'Thread not found' }], isError: true };
+          return { content: [{ type: 'text', text: 'Trail not found' }], isError: true };
         }
         return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
       }
 
-      case 'archive_thread': {
-        const result = await tools.archiveThread(args?.thread_id as string);
+      case 'archive_trail': {
+        const result = await tools.archiveTrail(args?.trail_id as string);
         if (!result) {
-          return { content: [{ type: 'text', text: 'Thread not found' }], isError: true };
+          return { content: [{ type: 'text', text: 'Trail not found' }], isError: true };
         }
         return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
       }
 
-      // Mark operations
-      case 'add_mark': {
-        const result = await tools.addMark({
-          thread_id: args?.thread_id as string,
+      // Clawmark operations
+      case 'add_clawmark': {
+        const result = await tools.addClawmark({
+          trail_id: args?.trail_id as string,
           file: args?.file as string,
           line: args?.line as number,
           column: args?.column as number | undefined,
           annotation: args?.annotation as string,
-          type: args?.type as MarkType | undefined,
+          type: args?.type as ClawmarkType | undefined,
           tags: args?.tags as string[] | undefined,
         });
         if ('error' in result) {
@@ -316,63 +316,63 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
       }
 
-      case 'update_mark': {
-        const result = await tools.updateMark(args?.mark_id as string, {
+      case 'update_clawmark': {
+        const result = await tools.updateClawmark(args?.clawmark_id as string, {
           annotation: args?.annotation as string | undefined,
-          type: args?.type as MarkType | undefined,
+          type: args?.type as ClawmarkType | undefined,
           tags: args?.tags as string[] | undefined,
           line: args?.line as number | undefined,
           column: args?.column as number | undefined,
         });
         if (!result) {
-          return { content: [{ type: 'text', text: 'Mark not found' }], isError: true };
+          return { content: [{ type: 'text', text: 'Clawmark not found' }], isError: true };
         }
         return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
       }
 
-      case 'delete_mark': {
-        const result = await tools.deleteMark(args?.mark_id as string);
+      case 'delete_clawmark': {
+        const result = await tools.deleteClawmark(args?.clawmark_id as string);
         return {
-          content: [{ type: 'text', text: result ? 'Mark deleted' : 'Mark not found' }],
+          content: [{ type: 'text', text: result ? 'Clawmark deleted' : 'Clawmark not found' }],
           isError: !result,
         };
       }
 
-      case 'list_marks': {
-        const result = await tools.listMarks({
-          thread_id: args?.thread_id as string | undefined,
+      case 'list_clawmarks': {
+        const result = await tools.listClawmarks({
+          trail_id: args?.trail_id as string | undefined,
           file: args?.file as string | undefined,
-          type: args?.type as MarkType | undefined,
+          type: args?.type as ClawmarkType | undefined,
           tag: args?.tag as string | undefined,
         });
         return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
       }
 
       // Reference operations
-      case 'link_marks': {
-        const result = await tools.linkMarks(
+      case 'link_clawmarks': {
+        const result = await tools.linkClawmarks(
           args?.source_id as string,
           args?.target_id as string
         );
         return {
-          content: [{ type: 'text', text: result ? 'Marks linked' : 'Failed to link marks' }],
+          content: [{ type: 'text', text: result ? 'Clawmarks linked' : 'Failed to link clawmarks' }],
           isError: !result,
         };
       }
 
-      case 'unlink_marks': {
-        const result = await tools.unlinkMarks(
+      case 'unlink_clawmarks': {
+        const result = await tools.unlinkClawmarks(
           args?.source_id as string,
           args?.target_id as string
         );
         return {
-          content: [{ type: 'text', text: result ? 'Marks unlinked' : 'Failed to unlink marks' }],
+          content: [{ type: 'text', text: result ? 'Clawmarks unlinked' : 'Failed to unlink clawmarks' }],
           isError: !result,
         };
       }
 
       case 'get_references': {
-        const result = await tools.getReferences(args?.mark_id as string);
+        const result = await tools.getReferences(args?.clawmark_id as string);
         return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
       }
 

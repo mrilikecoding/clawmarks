@@ -1,5 +1,5 @@
 import { ClawmarksStorage } from './storage.js';
-import { Thread, Mark, MarkType, ThreadStatus, generateId } from './types.js';
+import { Trail, Clawmark, ClawmarkType, TrailStatus, generateId } from './types.js';
 
 export class ClawmarksTools {
   private storage: ClawmarksStorage;
@@ -8,10 +8,10 @@ export class ClawmarksTools {
     this.storage = storage;
   }
 
-  // ==================== Thread Operations ====================
+  // ==================== Trail Operations ====================
 
-  async createThread(name: string, description?: string): Promise<Thread> {
-    const thread: Thread = {
+  async createTrail(name: string, description?: string): Promise<Trail> {
+    const trail: Trail = {
       id: generateId('t'),
       name,
       description,
@@ -20,53 +20,53 @@ export class ClawmarksTools {
     };
 
     await this.storage.updateData((data) => {
-      data.threads.push(thread);
+      data.trails.push(trail);
     });
 
-    return thread;
+    return trail;
   }
 
-  async listThreads(status?: ThreadStatus): Promise<Thread[]> {
+  async listTrails(status?: TrailStatus): Promise<Trail[]> {
     const data = await this.storage.getData();
     if (status) {
-      return data.threads.filter((t) => t.status === status);
+      return data.trails.filter((t) => t.status === status);
     }
-    return data.threads;
+    return data.trails;
   }
 
-  async getThread(threadId: string): Promise<{ thread: Thread; marks: Mark[] } | null> {
+  async getTrail(trailId: string): Promise<{ trail: Trail; clawmarks: Clawmark[] } | null> {
     const data = await this.storage.getData();
-    const thread = data.threads.find((t) => t.id === threadId);
-    if (!thread) {
+    const trail = data.trails.find((t) => t.id === trailId);
+    if (!trail) {
       return null;
     }
-    const marks = data.marks.filter((m) => m.thread_id === threadId);
-    return { thread, marks };
+    const clawmarks = data.clawmarks.filter((c) => c.trail_id === trailId);
+    return { trail, clawmarks };
   }
 
-  async archiveThread(threadId: string): Promise<Thread | null> {
-    let archivedThread: Thread | null = null;
+  async archiveTrail(trailId: string): Promise<Trail | null> {
+    let archivedTrail: Trail | null = null;
 
     await this.storage.updateData((data) => {
-      const thread = data.threads.find((t) => t.id === threadId);
-      if (thread) {
-        thread.status = 'archived';
-        archivedThread = thread;
+      const trail = data.trails.find((t) => t.id === trailId);
+      if (trail) {
+        trail.status = 'archived';
+        archivedTrail = trail;
       }
     });
 
-    return archivedThread;
+    return archivedTrail;
   }
 
-  async deleteThread(threadId: string): Promise<boolean> {
+  async deleteTrail(trailId: string): Promise<boolean> {
     let deleted = false;
 
     await this.storage.updateData((data) => {
-      const threadIndex = data.threads.findIndex((t) => t.id === threadId);
-      if (threadIndex !== -1) {
-        data.threads.splice(threadIndex, 1);
-        // Also remove all marks in this thread
-        data.marks = data.marks.filter((m) => m.thread_id !== threadId);
+      const trailIndex = data.trails.findIndex((t) => t.id === trailId);
+      if (trailIndex !== -1) {
+        data.trails.splice(trailIndex, 1);
+        // Also remove all clawmarks in this trail
+        data.clawmarks = data.clawmarks.filter((c) => c.trail_id !== trailId);
         deleted = true;
       }
     });
@@ -74,28 +74,28 @@ export class ClawmarksTools {
     return deleted;
   }
 
-  // ==================== Mark Operations ====================
+  // ==================== Clawmark Operations ====================
 
-  async addMark(params: {
-    thread_id: string;
+  async addClawmark(params: {
+    trail_id: string;
     file: string;
     line: number;
     column?: number;
     annotation: string;
-    type?: MarkType;
+    type?: ClawmarkType;
     tags?: string[];
-  }): Promise<Mark | { error: string }> {
+  }): Promise<Clawmark | { error: string }> {
     const data = await this.storage.getData();
 
-    // Verify thread exists
-    const thread = data.threads.find((t) => t.id === params.thread_id);
-    if (!thread) {
-      return { error: `Thread ${params.thread_id} not found` };
+    // Verify trail exists
+    const trail = data.trails.find((t) => t.id === params.trail_id);
+    if (!trail) {
+      return { error: `Trail ${params.trail_id} not found` };
     }
 
-    const mark: Mark = {
-      id: generateId('m'),
-      thread_id: params.thread_id,
+    const clawmark: Clawmark = {
+      id: generateId('c'),
+      trail_id: params.trail_id,
       file: params.file,
       line: params.line,
       column: params.column,
@@ -107,49 +107,49 @@ export class ClawmarksTools {
     };
 
     await this.storage.updateData((d) => {
-      d.marks.push(mark);
+      d.clawmarks.push(clawmark);
     });
 
-    return mark;
+    return clawmark;
   }
 
-  async updateMark(
-    markId: string,
+  async updateClawmark(
+    clawmarkId: string,
     updates: {
       annotation?: string;
-      type?: MarkType;
+      type?: ClawmarkType;
       tags?: string[];
       line?: number;
       column?: number;
     }
-  ): Promise<Mark | null> {
-    let updatedMark: Mark | null = null;
+  ): Promise<Clawmark | null> {
+    let updatedClawmark: Clawmark | null = null;
 
     await this.storage.updateData((data) => {
-      const mark = data.marks.find((m) => m.id === markId);
-      if (mark) {
-        if (updates.annotation !== undefined) mark.annotation = updates.annotation;
-        if (updates.type !== undefined) mark.type = updates.type;
-        if (updates.tags !== undefined) mark.tags = updates.tags;
-        if (updates.line !== undefined) mark.line = updates.line;
-        if (updates.column !== undefined) mark.column = updates.column;
-        updatedMark = mark;
+      const clawmark = data.clawmarks.find((c) => c.id === clawmarkId);
+      if (clawmark) {
+        if (updates.annotation !== undefined) clawmark.annotation = updates.annotation;
+        if (updates.type !== undefined) clawmark.type = updates.type;
+        if (updates.tags !== undefined) clawmark.tags = updates.tags;
+        if (updates.line !== undefined) clawmark.line = updates.line;
+        if (updates.column !== undefined) clawmark.column = updates.column;
+        updatedClawmark = clawmark;
       }
     });
 
-    return updatedMark;
+    return updatedClawmark;
   }
 
-  async deleteMark(markId: string): Promise<boolean> {
+  async deleteClawmark(clawmarkId: string): Promise<boolean> {
     let deleted = false;
 
     await this.storage.updateData((data) => {
-      const index = data.marks.findIndex((m) => m.id === markId);
+      const index = data.clawmarks.findIndex((c) => c.id === clawmarkId);
       if (index !== -1) {
-        data.marks.splice(index, 1);
-        // Also remove references to this mark from other marks
-        for (const mark of data.marks) {
-          mark.references = mark.references.filter((ref) => ref !== markId);
+        data.clawmarks.splice(index, 1);
+        // Also remove references to this clawmark from other clawmarks
+        for (const clawmark of data.clawmarks) {
+          clawmark.references = clawmark.references.filter((ref) => ref !== clawmarkId);
         }
         deleted = true;
       }
@@ -158,47 +158,47 @@ export class ClawmarksTools {
     return deleted;
   }
 
-  async listMarks(filters?: {
-    thread_id?: string;
+  async listClawmarks(filters?: {
+    trail_id?: string;
     file?: string;
-    type?: MarkType;
+    type?: ClawmarkType;
     tag?: string;
-  }): Promise<Mark[]> {
+  }): Promise<Clawmark[]> {
     const data = await this.storage.getData();
-    let marks = data.marks;
+    let clawmarks = data.clawmarks;
 
     if (filters) {
-      if (filters.thread_id) {
-        marks = marks.filter((m) => m.thread_id === filters.thread_id);
+      if (filters.trail_id) {
+        clawmarks = clawmarks.filter((c) => c.trail_id === filters.trail_id);
       }
       if (filters.file) {
-        marks = marks.filter((m) => m.file === filters.file);
+        clawmarks = clawmarks.filter((c) => c.file === filters.file);
       }
       if (filters.type) {
-        marks = marks.filter((m) => m.type === filters.type);
+        clawmarks = clawmarks.filter((c) => c.type === filters.type);
       }
       if (filters.tag) {
         const tag = filters.tag;
-        marks = marks.filter((m) => m.tags.includes(tag));
+        clawmarks = clawmarks.filter((c) => c.tags.includes(tag));
       }
     }
 
-    return marks;
+    return clawmarks;
   }
 
-  async getMark(markId: string): Promise<Mark | null> {
+  async getClawmark(clawmarkId: string): Promise<Clawmark | null> {
     const data = await this.storage.getData();
-    return data.marks.find((m) => m.id === markId) || null;
+    return data.clawmarks.find((c) => c.id === clawmarkId) || null;
   }
 
   // ==================== Reference/Link Operations ====================
 
-  async linkMarks(sourceId: string, targetId: string): Promise<boolean> {
+  async linkClawmarks(sourceId: string, targetId: string): Promise<boolean> {
     let linked = false;
 
     await this.storage.updateData((data) => {
-      const source = data.marks.find((m) => m.id === sourceId);
-      const target = data.marks.find((m) => m.id === targetId);
+      const source = data.clawmarks.find((c) => c.id === sourceId);
+      const target = data.clawmarks.find((c) => c.id === targetId);
 
       if (source && target && !source.references.includes(targetId)) {
         source.references.push(targetId);
@@ -209,11 +209,11 @@ export class ClawmarksTools {
     return linked;
   }
 
-  async unlinkMarks(sourceId: string, targetId: string): Promise<boolean> {
+  async unlinkClawmarks(sourceId: string, targetId: string): Promise<boolean> {
     let unlinked = false;
 
     await this.storage.updateData((data) => {
-      const source = data.marks.find((m) => m.id === sourceId);
+      const source = data.clawmarks.find((c) => c.id === sourceId);
       if (source) {
         const index = source.references.indexOf(targetId);
         if (index !== -1) {
@@ -226,34 +226,34 @@ export class ClawmarksTools {
     return unlinked;
   }
 
-  async getReferences(markId: string): Promise<{ outgoing: Mark[]; incoming: Mark[] }> {
+  async getReferences(clawmarkId: string): Promise<{ outgoing: Clawmark[]; incoming: Clawmark[] }> {
     const data = await this.storage.getData();
-    const mark = data.marks.find((m) => m.id === markId);
+    const clawmark = data.clawmarks.find((c) => c.id === clawmarkId);
 
-    if (!mark) {
+    if (!clawmark) {
       return { outgoing: [], incoming: [] };
     }
 
-    // Outgoing: marks this mark references
-    const outgoing = data.marks.filter((m) => mark.references.includes(m.id));
+    // Outgoing: clawmarks this clawmark references
+    const outgoing = data.clawmarks.filter((c) => clawmark.references.includes(c.id));
 
-    // Incoming: marks that reference this mark
-    const incoming = data.marks.filter((m) => m.references.includes(markId));
+    // Incoming: clawmarks that reference this clawmark
+    const incoming = data.clawmarks.filter((c) => c.references.includes(clawmarkId));
 
     return { outgoing, incoming };
   }
 
   // ==================== Tag Operations ====================
 
-  async addTagToMark(markId: string, tag: string): Promise<boolean> {
+  async addTagToClawmark(clawmarkId: string, tag: string): Promise<boolean> {
     // Ensure tag starts with #
     const normalizedTag = tag.startsWith('#') ? tag : `#${tag}`;
     let added = false;
 
     await this.storage.updateData((data) => {
-      const mark = data.marks.find((m) => m.id === markId);
-      if (mark && !mark.tags.includes(normalizedTag)) {
-        mark.tags.push(normalizedTag);
+      const clawmark = data.clawmarks.find((c) => c.id === clawmarkId);
+      if (clawmark && !clawmark.tags.includes(normalizedTag)) {
+        clawmark.tags.push(normalizedTag);
         added = true;
       }
     });
@@ -261,16 +261,16 @@ export class ClawmarksTools {
     return added;
   }
 
-  async removeTagFromMark(markId: string, tag: string): Promise<boolean> {
+  async removeTagFromClawmark(clawmarkId: string, tag: string): Promise<boolean> {
     const normalizedTag = tag.startsWith('#') ? tag : `#${tag}`;
     let removed = false;
 
     await this.storage.updateData((data) => {
-      const mark = data.marks.find((m) => m.id === markId);
-      if (mark) {
-        const index = mark.tags.indexOf(normalizedTag);
+      const clawmark = data.clawmarks.find((c) => c.id === clawmarkId);
+      if (clawmark) {
+        const index = clawmark.tags.indexOf(normalizedTag);
         if (index !== -1) {
-          mark.tags.splice(index, 1);
+          clawmark.tags.splice(index, 1);
           removed = true;
         }
       }
@@ -282,8 +282,8 @@ export class ClawmarksTools {
   async listAllTags(): Promise<string[]> {
     const data = await this.storage.getData();
     const tagSet = new Set<string>();
-    for (const mark of data.marks) {
-      for (const tag of mark.tags) {
+    for (const clawmark of data.clawmarks) {
+      for (const tag of clawmark.tags) {
         tagSet.add(tag);
       }
     }
