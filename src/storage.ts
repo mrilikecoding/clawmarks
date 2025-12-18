@@ -26,7 +26,11 @@ export class ClawmarksStorage {
       return this.data;
     } catch {
       // File doesn't exist, return default
-      this.data = { ...DEFAULT_CLAWMARKS_DATA };
+      this.data = {
+        ...DEFAULT_CLAWMARKS_DATA,
+        trails: [],
+        clawmarks: [],
+      };
       return this.data;
     }
   }
