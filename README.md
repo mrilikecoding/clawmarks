@@ -1,6 +1,19 @@
-# Clawmarks
+<p align="center">
+  <img src="logo.png" alt="Clawmarks" width="128" height="128">
+</p>
 
-Storybook-style annotated bookmarks for code exploration.
+<h1 align="center">Clawmarks</h1>
+
+<p align="center">
+  Storybook-style annotated bookmarks for code exploration.
+</p>
+
+<p align="center">
+  <a href="https://www.npmjs.com/package/clawmarks"><img src="https://img.shields.io/npm/v/clawmarks.svg" alt="npm version"></a>
+  <a href="https://www.npmjs.com/package/clawmarks"><img src="https://img.shields.io/npm/dm/clawmarks.svg" alt="npm downloads"></a>
+  <a href="https://github.com/mrilikecoding/clawmarks/blob/main/LICENSE"><img src="https://img.shields.io/npm/l/clawmarks.svg" alt="license"></a>
+  <a href="https://nodejs.org"><img src="https://img.shields.io/node/v/clawmarks.svg" alt="node version"></a>
+</p>
 
 ## The Problem
 
