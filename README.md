@@ -46,7 +46,16 @@ Each clawmark captures:
    git config --global core.excludesfile ~/.gitignore_global
    ```
 
-3. Add to your project's `.mcp.json`:
+3. Add the MCP server:
+
+   **Option A: Claude CLI (recommended)**
+   ```bash
+   claude mcp add --scope user clawmarks -- clawmarks
+   ```
+
+   **Option B: Manual configuration**
+
+   Add to your project's `.mcp.json`:
    ```json
    {
      "mcpServers": {
@@ -57,7 +66,13 @@ Each clawmark captures:
    }
    ```
 
-The server stores `.clawmarks.json` in the current working directory. Override with:
+The server stores `.clawmarks.json` in the current working directory. To override the project root:
+
+```bash
+claude mcp add --scope user clawmarks -- clawmarks --env CLAWMARKS_PROJECT_ROOT=/path/to/project
+```
+
+Or in `.mcp.json`:
 
 ```json
 {

@@ -19,7 +19,7 @@ const tools = new ClawmarksTools(storage);
 const server = new Server(
   {
     name: 'clawmarks',
-    version: '0.2.2',
+    version: '0.2.3',
   },
   {
     capabilities: {
