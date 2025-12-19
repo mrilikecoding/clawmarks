@@ -50,7 +50,7 @@ Each clawmark captures:
 
    **Option A: Claude CLI (recommended)**
    ```bash
-   claude mcp add --scope user clawmarks -- clawmarks
+   claude mcp add --scope user clawmarks -- clawmarks mcp
    ```
 
    **Option B: Manual configuration**
@@ -60,7 +60,8 @@ Each clawmark captures:
    {
      "mcpServers": {
        "clawmarks": {
-         "command": "clawmarks"
+         "command": "clawmarks",
+         "args": ["mcp"]
        }
      }
    }
@@ -69,7 +70,7 @@ Each clawmark captures:
 The server stores `.clawmarks.json` in the current working directory. To override the project root:
 
 ```bash
-claude mcp add --scope user clawmarks -- clawmarks --env CLAWMARKS_PROJECT_ROOT=/path/to/project
+claude mcp add --scope user clawmarks -- clawmarks mcp --env CLAWMARKS_PROJECT_ROOT=/path/to/project
 ```
 
 Or in `.mcp.json`:
@@ -79,6 +80,7 @@ Or in `.mcp.json`:
   "mcpServers": {
     "clawmarks": {
       "command": "clawmarks",
+      "args": ["mcp"],
       "env": {
         "CLAWMARKS_PROJECT_ROOT": "/path/to/project"
       }

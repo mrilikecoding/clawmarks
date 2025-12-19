@@ -10,6 +10,37 @@ import { ClawmarksStorage } from './storage.js';
 import { ClawmarksTools } from './tools.js';
 import { ClawmarkType, TrailStatus } from './types.js';
 
+const VERSION = '0.2.4';
+
+// Parse command line arguments
+const args = process.argv.slice(2);
+const command = args[0];
+
+if (command === '--version' || command === '-v') {
+  console.log(VERSION);
+  process.exit(0);
+}
+
+if (command === '--help' || command === '-h' || !command) {
+  console.log(`clawmarks v${VERSION}
+
+Usage:
+  clawmarks mcp         Start the MCP server (for LLM agents)
+  clawmarks --version   Show version
+  clawmarks --help      Show this help
+
+Setup:
+  claude mcp add --scope user clawmarks -- clawmarks mcp
+
+Learn more: https://github.com/mrilikecoding/clawmarks`);
+  process.exit(0);
+}
+
+if (command !== 'mcp') {
+  console.error(`Unknown command: ${command}\nRun 'clawmarks --help' for usage.`);
+  process.exit(1);
+}
+
 // Get project root from environment or use current working directory
 const PROJECT_ROOT = process.env.CLAWMARKS_PROJECT_ROOT || process.cwd();
 
@@ -19,7 +50,7 @@ const tools = new ClawmarksTools(storage);
 const server = new Server(
   {
     name: 'clawmarks',
-    version: '0.2.3',
+    version: VERSION,
   },
   {
     capabilities: {
